@@ -1,33 +1,36 @@
 {
-   "name": "node-swipl",
-   "version": "0.2.0",
-   "main": "swipl.js",
-   "description": "A node.js interface to the SWI-Prolog library",
-   "keywords": [
-       "swi",
-       "prolog",
-       "swipl",
-       "logic"
-   ],
-   "author": {
-       "name": "Tom Klonikowski",
-       "email": "klonik_t@informatik.haw-hamburg.de"
-   }, 
-   "license": "LGPL",
-   "repository": {
-       "type": "git",
-       "url": "git@github.com:jansegre/node-swipl.git" 
-   }, 
-   "directories": {
-       "src": "src",
-       "tests": "tests"
-   },
-   "engines": {
-       "node": ">=0.10.0",
-       "libswipl": ">=5.10.0"
-   },
-   "scripts": {
-       "install": "node-gyp configure build",
-       "test": "node tests/a.js"
-   }
+  "name": "node-swipl",
+  "version": "0.2.0",
+  "main": "swipl.js",
+  "description": "A node.js interface to the SWI-Prolog library",
+  "keywords": [
+    "swi",
+    "prolog",
+    "swipl",
+    "logic"
+  ],
+  "author": {
+    "name": "Tom Klonikowski",
+    "email": "klonik_t@informatik.haw-hamburg.de"
+  },
+  "license": "LGPL",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jansegre/node-swipl.git"
+  },
+  "directories": {
+    "src": "src",
+    "tests": "tests"
+  },
+  "engines": {
+    "node": ">=0.10.0",
+    "libswipl": ">=5.10.0"
+  },
+  "scripts": {
+    "install": "node-gyp configure build",
+    "test": "node tests/a.js"
+  },
+  "dependencies": {
+    "nan": "^2.4.0"
+  }
 }

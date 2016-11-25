@@ -24,20 +24,24 @@
 #ifndef NODE_LIBSWIPL_H_
 #define NODE_LIBSWIPL_H_
 
-#include <v8.h>
-#include <node.h>
+#include <nan.h>
 #include <SWI-Prolog.h>
 
-using namespace v8;
-using namespace node;
+using v8::String;
+using v8::Object;
+using v8::Value;
+using Nan::HandleScope;
+using v8::Number;
+using FunctionCallbackInfo = Nan::FunctionCallbackInfo<v8::Value>;
+using Nan::Persistent;
 
-Handle<Value> Initialise(const Arguments& args);
+void Initialise(const FunctionCallbackInfo&);
 
-Handle<Value> TermType(const Arguments& args);
+void TermType(const FunctionCallbackInfo&);
 
-Handle<Value> Cleanup(const Arguments& args);
+void Cleanup(const FunctionCallbackInfo&);
 
-class Query : public node::ObjectWrap {
+class Query : public Nan::ObjectWrap {
  public:
   static const int OPEN = 1;
   static const int CLOSED = 0;
@@ -47,10 +51,11 @@ class Query : public node::ObjectWrap {
   Query();
   ~Query();
 
-  static v8::Handle<v8::Value> Open(const v8::Arguments& args);
-  static v8::Handle<v8::Value> NextSolution(const v8::Arguments& args);
-  static v8::Handle<v8::Value> Close(const v8::Arguments& args);
-  static v8::Handle<v8::Value> Exception(const v8::Arguments& args);
+  static void Open(const FunctionCallbackInfo& args);
+  static void NextSolution(const FunctionCallbackInfo& args);
+  static void Close(const FunctionCallbackInfo& args);
+  static void Exception(const FunctionCallbackInfo& args);
+
   int open;
   qid_t qid;
   term_t term;

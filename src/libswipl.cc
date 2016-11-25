@@ -21,21 +21,22 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <v8.h>
-#include <node.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <cstdlib>
 #include <SWI-Prolog.h>
+
 #include "libswipl.h"
 
-using namespace v8;
-using namespace node;
+template<typename T>
+using Handle = v8::Handle<T>;
+
+using v8::FunctionTemplate;
+using v8::Local;
+using v8::Array;
 
 Handle<Object> ExportSolution(term_t t, int len, Handle<Object> result_terms,
     Handle<Object> varnames);
 
-module_t GetModule(const Arguments& args, int idx) {
+module_t GetModule(const FunctionCallbackInfo& args, int idx) {
   module_t mo = NULL;
   if (args.Length() > idx && !(args[idx]->IsUndefined() || args[idx]->IsNull())
       && args[idx]->IsString()) {
@@ -44,28 +45,28 @@ module_t GetModule(const Arguments& args, int idx) {
   return mo;
 }
 
-Handle<Value> Initialise(const Arguments& args) {
+void Initialise(const FunctionCallbackInfo& info) {
   int rval;
-  const char *plav[2];
+  const char *plav[3];
   HandleScope scope;
 
   /* make the argument vector for Prolog */
 
-  String::Utf8Value str(args[0]);
+  String::Utf8Value str(info[0]);
   plav[0] = *str;
   plav[1] = "--quiet";
-  plav[2] = NULL;
+  plav[2] = nullptr;
 
   /* initialise Prolog */
 
   rval = PL_initialise(2, (char **) plav);
 
-  return scope.Close(Number::New(rval));
+  info.GetReturnValue().Set(Nan::New<Number>(rval));
 }
 
 Handle<Value> CreateException(const char *msg) {
-  Handle<Object> result = Object::New();
-  result->Set(String::New("exc"), String::New(msg));
+  Handle<Object> result = Nan::New<Object>();
+  result->Set(Nan::New<String>("exc").ToLocalChecked(), Nan::New<String>(msg).ToLocalChecked());
   return result;
 }
 
@@ -86,20 +87,20 @@ const char* GetExceptionString(term_t term) {
 /**
  *
  */
-Handle<Value> TermType(const Arguments& args) {
+void TermType(const FunctionCallbackInfo& info) {
   int rval = 0;
   HandleScope scope;
   term_t term = PL_new_term_ref();
-  rval = PL_chars_to_term(*String::Utf8Value(args[0]), term);
+  rval = PL_chars_to_term(*String::Utf8Value(info[0]), term);
   if (rval) {
     rval = PL_term_type(term);
   }
-  return scope.Close(Number::New(rval));
+  info.GetReturnValue().Set(Nan::New<Number>(rval));
 }
 
 void ExportTerm(term_t t, Handle<Object> result, Handle<Object> varnames) {
   int rval = 0;
-  Handle<Value> key = varnames->Get(Integer::New(t));
+  Handle<Value> key = varnames->Get(t);
   Handle<Value> val;
   char *c;
   int i = 0;
@@ -109,15 +110,15 @@ void ExportTerm(term_t t, Handle<Object> result, Handle<Object> varnames) {
     switch (type) {
     case PL_FLOAT:
       rval = PL_get_float(t, &d);
-      val = Number::New(d);
+      val = Nan::New<Number>(d);
       break;
     case PL_INTEGER:
       rval = PL_get_integer(t, &i);
-      val = Integer::New(i);
+      val = Nan::New<v8::Integer>(i);
       break;
     default:
       rval = PL_get_chars(t, &c, CVT_ALL);
-      val = String::New(c);
+      val = Nan::New<String>(c).ToLocalChecked();
       break;
     }
     if (rval) {
@@ -134,120 +135,119 @@ Handle<Object> ExportSolution(term_t t, int len, Handle<Object> result_terms,
   return result_terms;
 }
 
-Handle<Value> Cleanup(const Arguments& args) {
+void Cleanup(const FunctionCallbackInfo& args) {
   HandleScope scope;
   int rval = PL_cleanup(0);
-  return scope.Close(Number::New(rval));
+  args.GetReturnValue().Set(Nan::New<Number>(rval));
 }
 
 Query::Query() {
 }
-;
+
 Query::~Query() {
 }
-;
+
 
 void Query::Init(Handle<Object> target) {
   // Prepare constructor template
-  Local<FunctionTemplate> tpl = FunctionTemplate::New(Open);
-  tpl->SetClassName(String::NewSymbol("Query"));
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(Open);
+  tpl->SetClassName(Nan::New<v8::String>("Query").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(3);
   // Prototype
-  tpl->PrototypeTemplate()->Set(String::NewSymbol("next_solution"),
-      FunctionTemplate::New(NextSolution)->GetFunction());
-  tpl->PrototypeTemplate()->Set(String::NewSymbol("close"),
-      FunctionTemplate::New(Close)->GetFunction());
-  tpl->PrototypeTemplate()->Set(String::NewSymbol("exception"),
-      FunctionTemplate::New(Exception)->GetFunction());
+  tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("next_solution").ToLocalChecked(),
+	  Nan::New<FunctionTemplate>(NextSolution)->GetFunction());
+  tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("close").ToLocalChecked(),
+	  Nan::New<FunctionTemplate>(Close)->GetFunction());
+  tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("exception").ToLocalChecked(),
+	  Nan::New<FunctionTemplate>(Exception)->GetFunction());
 
-  Persistent<Function> constructor = Persistent<Function>::New(
-      tpl->GetFunction());
-  target->Set(String::NewSymbol("Query"), constructor);
+  
+  auto constructor = Nan::GetFunction(tpl).ToLocalChecked();
+  Nan::Set(target, Nan::New<v8::String>("Query").ToLocalChecked(), constructor);
 }
 
-Handle<Value> Query::Open(const Arguments& args) {
-  HandleScope scope;
+void Query::Open(const FunctionCallbackInfo& args) {
+ // HandleScope scope;
 
-  Query* obj = new Query();
-  obj->cb_log = NULL; //&printf;
+ // Query* obj = new Query();
+ // obj->cb_log = NULL; //&printf;
 
-  module_t module = GetModule(args, 2);
-  const char *module_name =
-      module ? PL_atom_chars(PL_module_name(module)) : NULL;
+ // module_t module = GetModule(args, 2);
+ // const char *module_name =
+ //     module ? PL_atom_chars(PL_module_name(module)) : NULL;
 
-  if (args.Length() > 1 && args[0]->IsString() && args[1]->IsArray()) {
-    int rval = 0;
-    String::Utf8Value predicate(args[0]);
-    if (obj->cb_log)
-      obj->cb_log("Query::Open predicate: %s(", *predicate);
-    Handle<Array> terms = Handle<Array>::Cast(args[1]);
-    predicate_t p = PL_predicate(*predicate, terms->Length(), module_name);
-    obj->term = PL_new_term_refs(terms->Length());
-    obj->term_len = terms->Length();
-    obj->varnames = Persistent<Object>::New(Object::New());
-    term_t t = obj->term;
-    for (unsigned int i = 0; i < terms->Length(); i++) {
-      Local<Value> v = terms->Get(i);
-      if (v->IsInt32()) {
-        if (obj->cb_log)
-          obj->cb_log("%i", v->Int32Value());
-        rval = PL_put_integer(t, v->Int32Value());
-      } else if (v->IsNumber()) {
-        if (obj->cb_log)
-          obj->cb_log("%f", v->NumberValue());
-        rval = PL_put_float(t, v->NumberValue());
-      } else {
-        String::Utf8Value s(v);
-        if (obj->cb_log)
-          obj->cb_log("%s", *s);
-        rval = PL_chars_to_term(*s, t);
-        int type = PL_term_type(t);
-        if (obj->cb_log)
-          obj->cb_log(" [%i]", type);
-        switch (type) {
-        case PL_VARIABLE:
-          obj->varnames->Set(Integer::New(t), String::New(*s));
-          break;
-        case PL_ATOM:
-        case PL_TERM:
-        default:
-          break;
-        }
-      }
-      if (obj->cb_log)
-        obj->cb_log(", ");
-      t = t + 1;
-    }
+ // if (args.Length() > 1 && args[0]->IsString() && args[1]->IsArray()) {
+ //   int rval = 0;
+ //   String::Utf8Value predicate(args[0]);
+ //   if (obj->cb_log)
+ //     obj->cb_log("Query::Open predicate: %s(", *predicate);
+ //   Handle<Array> terms = Handle<Array>::Cast(args[1]);
+ //   predicate_t p = PL_predicate(*predicate, terms->Length(), module_name);
+ //   obj->term = PL_new_term_refs(terms->Length());
+ //   obj->term_len = terms->Length();
+ //   obj->varnames = Nan::New<Persistent<Object>>(Nan::New<Object>());
+ //   term_t t = obj->term;
+ //   for (unsigned int i = 0; i < terms->Length(); i++) {
+ //     Local<Value> v = terms->Get(i);
+ //     if (v->IsInt32()) {
+ //       if (obj->cb_log)
+ //         obj->cb_log("%i", v->Int32Value());
+ //       rval = PL_put_integer(t, v->Int32Value());
+ //     } else if (v->IsNumber()) {
+ //       if (obj->cb_log)
+ //         obj->cb_log("%f", v->NumberValue());
+ //       rval = PL_put_float(t, v->NumberValue());
+ //     } else {
+ //       String::Utf8Value s(v);
+ //       if (obj->cb_log)
+ //         obj->cb_log("%s", *s);
+ //       rval = PL_chars_to_term(*s, t);
+ //       int type = PL_term_type(t);
+ //       if (obj->cb_log)
+ //         obj->cb_log(" [%i]", type);
+ //       switch (type) {
+ //       case PL_VARIABLE:
+ //         Nan::New(obj->varnames)->Set(t, Nan::New<String>(*s).ToLocalChecked());
+ //         break;
+ //       case PL_ATOM:
+ //       case PL_TERM:
+ //       default:
+ //         break;
+ //       }
+ //     }
+ //     if (obj->cb_log)
+ //       obj->cb_log(", ");
+ //     t = t + 1;
+ //   }
 
-    obj->qid = PL_open_query(module, PL_Q_CATCH_EXCEPTION, p, obj->term);
+ //   obj->qid = PL_open_query(module, PL_Q_CATCH_EXCEPTION, p, obj->term);
 
-    if (obj->cb_log)
-      obj->cb_log(") #%li\n", obj->qid);
+ //   if (obj->cb_log)
+ //     obj->cb_log(") #%li\n", obj->qid);
 
-    if (obj->qid == 0) {
-      ThrowException(
-          Exception::Error(
-              String::New("not enough space on the environment stack")));
-      return scope.Close(Undefined());
-    } else if (rval == 0) {
-      ThrowException(
-          Exception::Error(
-              String::New(GetExceptionString(PL_exception(obj->qid)))));
-      return scope.Close(Undefined());
-    } else {
-      obj->open = OPEN;
-      obj->Wrap(args.This());
-      return args.This();
-    }
-  } else {
-    ThrowException(
-        Exception::SyntaxError(
-            String::New("invalid arguments (pred, [ args ], module)")));
-    return scope.Close(Undefined());
-  }
+ //   if (obj->qid == 0) {
+ //     Nan::ThrowError(
+ //         v8::Exception::Error(
+ //             Nan::New<String>("not enough space on the environment stack").ToLocalChecked()));
+	//  args.GetReturnValue().SetUndefined();
+ //   } else if (rval == 0) {
+	//	Nan::ThrowError(
+ //         v8::Exception::Error(
+ //             Nan::New<String>(GetExceptionString(PL_exception(obj->qid))).ToLocalChecked()));
+	//	args.GetReturnValue().SetUndefined();
+ //   } else {
+ //     obj->open = OPEN;
+ //     obj->Wrap(args.This());
+	//  args.GetReturnValue().Set(args.This());
+ //   }
+ // } else {
+ //   Nan::ThrowError(
+ //       v8::Exception::SyntaxError(Nan::New<String>("invalid arguments (pred, [ args ], module)").ToLocalChecked()));
+	//args.GetReturnValue().SetUndefined();
+ // }
 }
 
-Handle<Value> Query::NextSolution(const Arguments& args) {
+void Query::NextSolution(const FunctionCallbackInfo& args) {
   HandleScope scope;
   int rval = 0;
 
@@ -262,19 +262,17 @@ Handle<Value> Query::NextSolution(const Arguments& args) {
       obj->cb_log(": %i\n", rval);
 
     if (rval) {
-      return scope.Close(
-          ExportSolution(obj->term, obj->term_len, Object::New(),
-              obj->varnames));
+		args.GetReturnValue().Set(ExportSolution(obj->term, obj->term_len, Nan::New<Object>(), Nan::New(obj->varnames)));
     } else {
-      return scope.Close(Boolean::New(false));
+		args.GetReturnValue().Set(false);
     }
   } else {
-    ThrowException(Exception::Error(String::New("query is closed")));
-    return scope.Close(Undefined());
+	  Nan::ThrowError(v8::Exception::Error(Nan::New<String>("query is closed").ToLocalChecked()));
+	  args.GetReturnValue().SetUndefined();
   }
 }
 
-Handle<Value> Query::Exception(const Arguments& args) {
+void Query::Exception(const FunctionCallbackInfo& args) {
   HandleScope scope;
 
   Query* obj = ObjectWrap::Unwrap<Query>(args.This());
@@ -282,14 +280,14 @@ Handle<Value> Query::Exception(const Arguments& args) {
     obj->cb_log("Query::Exception #%li\n", obj->qid);
   term_t term = PL_exception(obj->qid);
 
-  if (term) {
-    return scope.Close(CreateException(GetExceptionString(term)));
+  if (term) {    
+	args.GetReturnValue().Set(CreateException(GetExceptionString(term)));
   } else {
-    return scope.Close(Boolean::New(false));
+	  args.GetReturnValue().Set(Nan::True());
   }
 }
 
-Handle<Value> Query::Close(const Arguments& args) {
+void Query::Close(const FunctionCallbackInfo& args) {
   HandleScope scope;
 
   Query* obj = ObjectWrap::Unwrap<Query>(args.This());
@@ -300,18 +298,21 @@ Handle<Value> Query::Close(const Arguments& args) {
     obj->open = CLOSED;
   }
 
-  return scope.Close(Boolean::New(true));
+  args.GetReturnValue().Set(true);
 }
 
-extern "C" void init(Handle<Object> target) {
-  target->Set(String::NewSymbol("initialise"),
-      FunctionTemplate::New(Initialise)->GetFunction());
-  target->Set(String::NewSymbol("term_type"),
-      FunctionTemplate::New(TermType)->GetFunction());
-  target->Set(String::NewSymbol("cleanup"),
-      FunctionTemplate::New(Cleanup)->GetFunction());
+
+NAN_MODULE_INIT(init) {
+  Nan::Set(target, Nan::New<String>("initialise").ToLocalChecked(),
+	  Nan::GetFunction(Nan::New<FunctionTemplate>(Initialise)).ToLocalChecked());
+
+  Nan::Set(target, Nan::New<String>("term_type").ToLocalChecked(),
+	  Nan::GetFunction(Nan::New<FunctionTemplate>(TermType)).ToLocalChecked());
+
+  Nan::Set(target, Nan::New<String>("cleanup").ToLocalChecked(),
+	  Nan::GetFunction(Nan::New<FunctionTemplate>(Cleanup)).ToLocalChecked());
+  
   Query::Init(target);
 }
 
 NODE_MODULE(libswipl, init)
-
