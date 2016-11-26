@@ -167,84 +167,85 @@ void Query::Init(Handle<Object> target) {
 }
 
 void Query::Open(const FunctionCallbackInfo& args) {
- // HandleScope scope;
+  HandleScope scope;
 
- // Query* obj = new Query();
- // obj->cb_log = NULL; //&printf;
+  Query* obj = new Query();
+  obj->cb_log = NULL; //&printf;
 
- // module_t module = GetModule(args, 2);
- // const char *module_name =
- //     module ? PL_atom_chars(PL_module_name(module)) : NULL;
+  module_t module = GetModule(args, 2);
+  const char *module_name =
+      module ? PL_atom_chars(PL_module_name(module)) : NULL;
 
- // if (args.Length() > 1 && args[0]->IsString() && args[1]->IsArray()) {
- //   int rval = 0;
- //   String::Utf8Value predicate(args[0]);
- //   if (obj->cb_log)
- //     obj->cb_log("Query::Open predicate: %s(", *predicate);
- //   Handle<Array> terms = Handle<Array>::Cast(args[1]);
- //   predicate_t p = PL_predicate(*predicate, terms->Length(), module_name);
- //   obj->term = PL_new_term_refs(terms->Length());
- //   obj->term_len = terms->Length();
- //   obj->varnames = Nan::New<Persistent<Object>>(Nan::New<Object>());
- //   term_t t = obj->term;
- //   for (unsigned int i = 0; i < terms->Length(); i++) {
- //     Local<Value> v = terms->Get(i);
- //     if (v->IsInt32()) {
- //       if (obj->cb_log)
- //         obj->cb_log("%i", v->Int32Value());
- //       rval = PL_put_integer(t, v->Int32Value());
- //     } else if (v->IsNumber()) {
- //       if (obj->cb_log)
- //         obj->cb_log("%f", v->NumberValue());
- //       rval = PL_put_float(t, v->NumberValue());
- //     } else {
- //       String::Utf8Value s(v);
- //       if (obj->cb_log)
- //         obj->cb_log("%s", *s);
- //       rval = PL_chars_to_term(*s, t);
- //       int type = PL_term_type(t);
- //       if (obj->cb_log)
- //         obj->cb_log(" [%i]", type);
- //       switch (type) {
- //       case PL_VARIABLE:
- //         Nan::New(obj->varnames)->Set(t, Nan::New<String>(*s).ToLocalChecked());
- //         break;
- //       case PL_ATOM:
- //       case PL_TERM:
- //       default:
- //         break;
- //       }
- //     }
- //     if (obj->cb_log)
- //       obj->cb_log(", ");
- //     t = t + 1;
- //   }
+  if (args.Length() > 1 && args[0]->IsString() && args[1]->IsArray()) {
+    int rval = 0;
+    String::Utf8Value predicate(args[0]);
+	if (obj->cb_log) {
+		obj->cb_log("Query::Open predicate: %s(", *predicate);
+	}
+    Handle<Array> terms = Handle<Array>::Cast(args[1]);
+    predicate_t p = PL_predicate(*predicate, terms->Length(), module_name);
+    obj->term = PL_new_term_refs(terms->Length());
+    obj->term_len = terms->Length();
+	obj->varnames.Reset(Nan::New<Object>());
+    term_t t = obj->term;
+    for (unsigned int i = 0; i < terms->Length(); i++) {
+      Local<Value> v = terms->Get(i);
+      if (v->IsInt32()) {
+        if (obj->cb_log)
+          obj->cb_log("%i", v->Int32Value());
+        rval = PL_put_integer(t, v->Int32Value());
+      } else if (v->IsNumber()) {
+        if (obj->cb_log)
+          obj->cb_log("%f", v->NumberValue());
+        rval = PL_put_float(t, v->NumberValue());
+      } else {
+        String::Utf8Value s(v);
+        if (obj->cb_log)
+          obj->cb_log("%s", *s);
+        rval = PL_chars_to_term(*s, t);
+        int type = PL_term_type(t);
+        if (obj->cb_log)
+          obj->cb_log(" [%i]", type);
+        switch (type) {
+        case PL_VARIABLE:
+          Nan::New(obj->varnames)->Set(t, Nan::New<String>(*s).ToLocalChecked());
+          break;
+        case PL_ATOM:
+        case PL_TERM:
+        default:
+          break;
+        }
+      }
+      if (obj->cb_log)
+        obj->cb_log(", ");
+      t = t + 1;
+    }
 
- //   obj->qid = PL_open_query(module, PL_Q_CATCH_EXCEPTION, p, obj->term);
+    obj->qid = PL_open_query(module, PL_Q_CATCH_EXCEPTION, p, obj->term);
 
- //   if (obj->cb_log)
- //     obj->cb_log(") #%li\n", obj->qid);
+    if (obj->cb_log)
+      obj->cb_log(") #%li\n", obj->qid);
 
- //   if (obj->qid == 0) {
- //     Nan::ThrowError(
- //         v8::Exception::Error(
- //             Nan::New<String>("not enough space on the environment stack").ToLocalChecked()));
-	//  args.GetReturnValue().SetUndefined();
- //   } else if (rval == 0) {
-	//	Nan::ThrowError(
- //         v8::Exception::Error(
- //             Nan::New<String>(GetExceptionString(PL_exception(obj->qid))).ToLocalChecked()));
-	//	args.GetReturnValue().SetUndefined();
- //   } else {
- //     obj->open = OPEN;
- //     obj->Wrap(args.This());
-	//  args.GetReturnValue().Set(args.This());
- //   }
- // } else {
- //   Nan::ThrowError(
- //       v8::Exception::SyntaxError(Nan::New<String>("invalid arguments (pred, [ args ], module)").ToLocalChecked()));
-	//args.GetReturnValue().SetUndefined();
- // }
+    if (obj->qid == 0) {
+      Nan::ThrowError(
+          v8::Exception::Error(
+              Nan::New<String>("not enough space on the environment stack").ToLocalChecked()));
+	  args.GetReturnValue().SetUndefined();
+    } else if (rval == 0) {
+		Nan::ThrowError(
+          v8::Exception::Error(
+              Nan::New<String>(GetExceptionString(PL_exception(obj->qid))).ToLocalChecked()));
+		args.GetReturnValue().SetUndefined();
+    } else {
+      obj->open = OPEN;
+      obj->Wrap(args.This());
+	  args.GetReturnValue().Set(args.This());
+    }
+  } else {
+    Nan::ThrowError(
+        v8::Exception::SyntaxError(Nan::New<String>("invalid arguments (pred, [ args ], module)").ToLocalChecked()));
+	args.GetReturnValue().SetUndefined();
+  }
 }
 
 void Query::NextSolution(const FunctionCallbackInfo& args) {
