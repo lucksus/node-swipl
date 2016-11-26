@@ -155,11 +155,11 @@ void Query::Init(Handle<Object> target) {
   tpl->InstanceTemplate()->SetInternalFieldCount(3);
   // Prototype
   tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("next_solution").ToLocalChecked(),
-	  Nan::New<FunctionTemplate>(NextSolution)->GetFunction());
+	  Nan::New<FunctionTemplate>(NextSolution));
   tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("close").ToLocalChecked(),
-	  Nan::New<FunctionTemplate>(Close)->GetFunction());
+	  Nan::New<FunctionTemplate>(Close));
   tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("exception").ToLocalChecked(),
-	  Nan::New<FunctionTemplate>(Exception)->GetFunction());
+	  Nan::New<FunctionTemplate>(Exception));
 
   
   auto constructor = Nan::GetFunction(tpl).ToLocalChecked();
