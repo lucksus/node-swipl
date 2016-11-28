@@ -27,6 +27,13 @@ After building, try running:
 
 If you like it, use and/or fork it. Corrections and improvements are welcome.
 
+Using with windows
+-----------
+
+You would need to install `npm install --global --production windows-build-tools`.
+
+It's also necessary to add `%SWI_HOME_DIR%\bin` to PATH. 
+
 Basic usage
 -----------
 
