@@ -1,6 +1,7 @@
 {
     "variables": {
-        "swipl%":"<!(node swipl_home.js)"
+        "plbase%":"<!(node swipl_home.js PLBASE)",
+        "plarch%":"<!(node swipl_home.js PLARCH)"
     },
     "targets": [
         {
@@ -11,7 +12,7 @@
             ],
             "include_dirs": [
                 "./src",
-                "<(swipl)/include",
+                "<(plbase)/include",
                 "<!(node -e \"require('nan')\")"
             ],
             "direct_dependent_settings": {
@@ -22,9 +23,9 @@
             },
             "conditions": [
                 ['OS=="win"', {
-                    "libraries": [ "-l<(swipl)/lib/libswipl.lib" ]
+                    "libraries": [ "-l<(plbase)/lib/libswipl.lib" ]
                 },{
-                    "libraries": [ "-lswipl -L<(swipl)/lib/x86_64-linux -Wl,-rpath <(swipl)/lib/x86_64-linux" ]
+                    "libraries": [ "-lswipl -L<(plbase)/lib/<(plarch) -Wl,-rpath <(plbase)/lib/<(plarch)" ]
                 }]
             ]
         }
