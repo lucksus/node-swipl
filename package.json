@@ -1,7 +1,7 @@
 {
   "name": "node-swipl",
   "version": "0.2.0",
-  "main": "swipl.js",
+  "main": "index.js",
   "description": "A node.js interface to the SWI-Prolog library",
   "keywords": [
     "swi",
