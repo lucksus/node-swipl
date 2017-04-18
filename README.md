@@ -1,41 +1,34 @@
-node-swipl
-==========
+# node-swipl
 
-A node.js interface to the SWI-Prolog library. A fork of [node-prolog-swi](https://github.com/kloni/node-prolog-swi).
+A Node.js interface to the SWI-Prolog.
 
-For now, this addon supports the creation of rules and facts 'on the fly' and querying.
+For now, this addon supports the creation of rules and facts on
+the fly and querying.
 
-The SWI-Prolog library requires the `SWI_HOME_DIR` environment variable to be set (See 
-http://www.swi-prolog.org/FAQ/FindResources.html). Thus an example call could be:
+## Platform support
 
-    SWI_HOME_DIR=/usr/lib/swi-prolog node tests/a.js
+The bindings are tested on various Linux distributions, on Windows,
+and on MacOS. SWI-Prolog command `swipl` must be available in `PATH`
+on all of these operating systems.
 
-Missing `SWI_HOME_DIR` will result in
+### Windows
 
-    [FATAL ERROR:
-        Could not find system resources]
+Microsoft build tools must be installed:
 
-Now builds with node-gyp (Thanks to Johny Jose):
+```
+npm install --global --production windows-build-tools
+```
 
-    $ node-gyp configure
-    $ SWI_HOME_DIR=/usr/lib/swi-prolog node-gyp build 
+SWI-Prolog command `swipl` must be available in `PATH`.
 
-After building, try running:
+### MacOS
 
-    $ SWI_HOME_DIR=/usr/lib/swi-prolog NODE_PATH=build/Release node tests/a.js
+SWI-Prolog must be installed or compiled through Macports. This is
+described here <http://www.swi-prolog.org/build/macos.html>. The setup was
+tested on MacOS Sierra by installing dependencies from ports and compiling
+with prefix `/usr/local` (adjust `build.templ`).
 
-
-If you like it, use and/or fork it. Corrections and improvements are welcome.
-
-Using with windows
------------
-
-You would need to install `npm install --global --production windows-build-tools`.
-
-It's also necessary to add `%SWI_HOME_DIR%\bin` to PATH. 
-
-Basic usage
------------
+### Basic usage
 
 Initialization
 
@@ -75,7 +68,6 @@ Cleanup
 
     swipl.cleanup();
 
-License
--------
+### License
 
-Licensed under LGPL a copy is available on [the LICENSE.txt file](LICENSE.txt).
+Licensed under LGPL 3.0. A copy is available in [the LICENSE.txt file](LICENSE.txt).
