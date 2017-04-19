@@ -172,6 +172,9 @@ Local<Value> ExportTermValue(term_t t) {
         case PL_BLOB:
             Nan::ThrowError("Term PL_BLOB cannot be exported yet.");
             return Nan::Null();
+        case PL_DICT:
+            Nan::ThrowError("Term PL_DICT cannot be exported yet.");
+            return Nan::Null();
         default:
             Nan::ThrowError("Unknown exported term.");
             return Nan::Null();
