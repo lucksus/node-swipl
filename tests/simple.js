@@ -3,6 +3,6 @@ const swipl = require('../');
 
 describe('Simple queries', () => {
     it('should call member', () => {
-        assert.equal(swipl.callPredicate('member(M, [1,2,3,4])').M, 1);
+        assert.equal(swipl.call('member(M, [1,2,3,4])').M, 1);
     });
 });

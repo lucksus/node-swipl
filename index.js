@@ -58,7 +58,7 @@ const Query = exports.Query = class Query {
 
 // Helper to call single query.
 
-exports.callPredicate = (query) => {
+exports.call = (query) => {
 	const instance = new Query(query);
 	try {
 		const bindings = instance.next();

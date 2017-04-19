@@ -6,6 +6,47 @@ A Node.js interface to the SWI-Prolog.
 
 ## Usage
 
+Calling a predicate and returning bindings with
+the first solution:
+
+```js
+const swipl = require('swipl');
+const ret = swipl.call('member(X, [1,2,3,4])');
+if (ret) {
+    console.log(`Variable X value is: ${ret.X}`);
+} else {
+    console.log('Call failed.');
+}
+```
+
+Outputs:
+
+```
+Variable X value is: 1
+```
+
+Calling a predicate and returning all solutions:
+
+```js
+const swipl = require('swipl');
+const query = new swipl.Query('member(X, [1,2,3,4])');
+let ret = null;
+while (ret = query.next()) {
+    console.log(`Variable X value is: ${ret.X}`);
+}
+```
+
+Outputs:
+
+```
+Variable X value is: 1
+Variable X value is: 2
+Variable X value is: 3
+Variable X value is: 4
+```
+
+There can be only one query open at a time.
+
 ### Error handling
 
 Syntax errors in queries are thrown. Error messages
@@ -15,7 +56,7 @@ closed.
 Invalid query example: `member(X, [1,2,3,4]` (missing closing paren):
 
 ```js
-swipl.callPredicate('member(X, [1,2,3,4]');
+swipl.call('member(X, [1,2,3,4]');
 ```
 
 Throws error with message:
@@ -30,7 +71,7 @@ member(X, 1,2,3,4
 Known errors are thrown with the error message.
 
 ```js
-swipl.callPredicate('error:must_be(ground, _)');
+swipl.call('error:must_be(ground, _)');
 ```
 
 Throws error with message:
@@ -44,7 +85,7 @@ Custom errors without a message are thrown with JavaScript
 error containing the error term:
 
 ```js
-swipl.callPredicate('throw(error(test))');
+swipl.call('throw(error(test))');
 ```
 
 Throws error with message:

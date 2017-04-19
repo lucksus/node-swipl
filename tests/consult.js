@@ -3,7 +3,7 @@ const swipl = require('../');
 
 describe('Consult files', () => {
     it('should load a trivial file', () => {
-        swipl.callPredicate('consult(tests/consult)');
-        assert.equal(swipl.callPredicate('hello(W)').W, 'world');
+        swipl.call('consult(tests/consult)');
+        assert.equal(swipl.call('hello(W)').W, 'world');
     });
 });
