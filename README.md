@@ -2,6 +2,8 @@
 
 A Node.js interface to the SWI-Prolog.
 
+[![Build Status](https://travis-ci.org/rla/node-swipl.svg?branch=master)](https://travis-ci.org/rla/node-swipl)
+
 ## Usage
 
 ### Error handling
