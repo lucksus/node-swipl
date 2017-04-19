@@ -85,7 +85,12 @@ with prefix `/usr/local` (adjust `build.templ`).
 
 ## Known issues
 
- * PL_BLOB is not handled.
+ * Exporting PL_BLOB terms is not handled.
+ * Exporting PL_DICT terms is not supported. It is not supported at all by SWI-Prolog
+   foreign interface.
+ * Installed files cannot be copied around on *nix. The linker has libswipl location
+   specified absolutely in the binding object file. The location of `SWI_HOME_DIR` is
+   determined install-time and written into the file `plbase.conf`.
 
 ### License
 
