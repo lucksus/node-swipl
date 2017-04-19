@@ -28,6 +28,10 @@ described here <http://www.swi-prolog.org/build/macos.html>. The setup was
 tested on MacOS Sierra by installing dependencies from ports and compiling
 with prefix `/usr/local` (adjust `build.templ`).
 
+## Known issues
+
+ * PL_BLOB is not handled.
+
 ### Basic usage
 
 Initialization

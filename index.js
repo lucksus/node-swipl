@@ -1,52 +1,45 @@
-var swipl = require("./build/Release/libswipl");
+const assert = require('assert');
+const swipl = require('./build/Release/libswipl');
 
-function Module(mod) {
-	this.module_name = mod;
-}
+const Query = exports.Query = class Query {
+	constructor(query) {
+		assert.equal(typeof query, 'string',
+			'Query must be set as a string.');
+		this.internal = new swipl.InternalQuery(query);
+	}
 
-Module.prototype = {
-	module : function(mod) {
-		return new Module(mod);
-	},
-
-	term_type : function(term) {
-		var r = swipl.term_type(term);
-		if(this.DEBUG) console.log("[libswipl] term_type: " + r + " " + term);
-		return r;
-	},
-
-	open_query : function(predicate, args) {
-		return new swipl.Query(predicate, args, this.module_name);
-	},
-
-	call_predicate : function(name, args) {
-		var query = new swipl.Query(name, args, this.module_name);
-		var result = false;
-		var r = query.next_solution();
-		if (r) {
-			result = r;
-			if(this.DEBUG) console.log("[libswipl] call_predicate: "
-					+ JSON.stringify(r));
+	next() {
+		const bindings = this.internal.next();
+		if (!bindings) {
+			return false;
 		} else {
-			var ex = query.exception();
-			if (ex) {
-				throw new Error(ex.exc);
-			} else {
-				if(this.DEBUG) console.log("[libswipl] call_predicate: " + r);
-			}
+			return extractBindings(bindings);
 		}
-		query.close();
-		return result;
-	},
+	}
 
-	assert : function(term) {
-		if(this.DEBUG) console.log("[libswipl] assert: " + term);
-		return this.call_predicate("assert", [ term ]);
+	close() {
+		this.internal.close();
 	}
 };
 
-exports.module = function(mod) {
-	return new Module(mod);
+// Helper to call single query.
+
+exports.callPredicate = (query) => {
+	const instance = new Query(query);
+	const bindings = instance.next();
+	instance.close();
+	return bindings;
+};
+
+// Extracts bindings from the option list.
+
+const extractBindings = (list) => {
+	const bindings = {};
+	while (list !== '[]') {
+		bindings[list.head.args[0]] = list.head.args[1];
+		list = list.tail;
+	}
+	return bindings;
 };
 
 exports.initialise = function(prog) {

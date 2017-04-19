@@ -28,7 +28,7 @@
   },
   "scripts": {
     "install": "node-gyp configure build",
-    "test": "mocha tests/simple.js tests/consult.js"
+    "test": "mocha tests/bridge.js tests/simple.js tests/consult.js"
   },
   "dependencies": {
     "nan": "^2.4.0"

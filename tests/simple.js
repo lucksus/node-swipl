@@ -7,7 +7,6 @@ if (swipl.initialise() !== 1) {
 
 describe('Simple queries', () => {
     it('should call member', () => {
-        const user = swipl.module('user');
-        assert.equal(user.call_predicate('member', ['M', '[1,2,3,4]']).M, 1);
+        assert.equal(swipl.callPredicate('member(M, [1,2,3,4])').M, 1);
     });
 });
