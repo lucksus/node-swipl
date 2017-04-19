@@ -203,7 +203,7 @@ A list of helpful resources:
 ### License
 
 Licensed under LGPL 3.0. A copy is available in [the LICENSE.txt file](LICENSE.txt).
-File `lib/serialize_string.js` is ported from the [pengines][pengines] projects and is licensed
+File `lib/serialize_string.js` is ported from the [pengines][pengines] project and is licensed
 under BSD (see the file header).
 
 [pengines]:https://github.com/SWI-Prolog/pengines
