@@ -9,7 +9,8 @@ A Node.js interface to the SWI-Prolog.
 ### Error handling
 
 Syntax errors in queries are thrown. Error messages
-are read from the prolog.
+are read from the prolog. The current query is automatically
+closed.
 
 Invalid query example: `member(X, [1,2,3,4]` (missing closing paren):
 
@@ -91,6 +92,14 @@ with prefix `/usr/local` (adjust `build.templ`).
  * Installed files cannot be copied around on *nix. The linker has libswipl location
    specified absolutely in the binding object file. The location of `SWI_HOME_DIR` is
    determined install-time and written into the file `plbase.conf`.
+
+## Development
+
+A list of helpful resources:
+ 
+ * SWI-Prolog Foreign Interface documentation: <http://www.swi-prolog.org/pldoc/man?section=foreign>
+ * Node.js native addons: <https://nodejs.org/api/addons.html>
+ * PySWIP sources: <https://code.google.com/archive/p/pyswip/>
 
 ### License
 

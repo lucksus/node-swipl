@@ -19,10 +19,14 @@ exports.autoInitialise = (initialise) => {
 	autoInitialise = !!initialise;
 };
 
+let current = null;
+
 const Query = exports.Query = class Query {
 	constructor(query) {
 		assert.equal(typeof query, 'string',
 			'Query must be set as a string.');
+		assert.ok(current === null,
+			'There can be only one open query at a time.');
 		if (!initialised) {
 			if (autoInitialise) {
 				if (!swipl.initialise('node')) {
@@ -34,6 +38,7 @@ const Query = exports.Query = class Query {
 			}
 		}
 		this.internal = new swipl.InternalQuery(query);
+		current = this;
 	}
 
 	next() {
@@ -47,6 +52,7 @@ const Query = exports.Query = class Query {
 
 	close() {
 		this.internal.close();
+		current = null;
 	}
 };
 

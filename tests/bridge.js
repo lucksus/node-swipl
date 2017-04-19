@@ -39,4 +39,19 @@ describe('SWIPL interface', () => {
             assert.ok(err.toString().indexOf('Unknown message: error(test)')) > 0;
         }
     });
+
+    it('should allow call to predicate that needs foreign frame', () => {
+        swipl.callPredicate("exists_file('index.js')");
+    });
+
+    it('should not allow multiple open queries', () => {
+        const q1 = new swipl.Query('member(X, 1,2,3,4)');
+        try {
+            const q2 = new swipl.Query('member(X, 1,2,3,4)');
+        } catch (err) {
+            assert.ok(err.toString().indexOf('only one open query at a time') > 0);
+        } finally {
+            q1.close();
+        }
+    });
 });
