@@ -47,6 +47,42 @@ Variable X value is: 4
 
 There can be only one query open at a time.
 
+### Create modules and specify context
+
+Use module operator `:` to call code in different
+modules. The default call assumes the `user` module.
+
+```js
+swipl.call('assert(mymodule:test(1))');
+console.log(swipl.call('mymodule:test(X)'));
+```
+
+### Consult external files
+
+Load code from external files. You might have
+to set the working directory if you want to use relative paths.
+
+```js
+swipl.call('working_directory(_, prolog)');
+swipl.call('consult(mycode)');
+```
+
+### Term representation
+
+Prolog terms in variable bindings are converted into
+JavaScript objects under the following rules:
+
+ * Integers are converted to numbers.
+ * Floats are converted to numbers.
+ * Atoms and strings are converted to strings.
+ * Empty list is converted to string `[]`.
+ * List head tail pair is converted to object `{ head, tail }` where
+   `head` and `tail` are converted terms.
+ * Compound term is converted to object `{ name, args }` where
+   `name` is the compound functor name and `args` is the array
+   of converted argument terms.
+ * Blobs and dicts are not supported and will throw an error.
+
 ### Error handling
 
 Syntax errors in queries are thrown. Error messages

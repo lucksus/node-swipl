@@ -283,6 +283,7 @@ class InternalQuery : public Nan::ObjectWrap {
             InternalQuery* queryObject = ObjectWrap::Unwrap<InternalQuery>(args.This());
             if (queryObject->open == OPEN) {
                 if (PL_next_solution(queryObject->qid)) {
+                    // TODO add try/catch
                     args.GetReturnValue().Set(ExportTermValue(queryObject->bindings));
                 } else {
                     // Check if exception was raised during execution.
