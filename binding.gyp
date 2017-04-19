@@ -1,7 +1,7 @@
 {
     "variables": {
-        "plbase%":"<!(node swipl_home.js PLBASE)",
-        "plarch%":"<!(node swipl_home.js PLARCH)"
+        "plbase%":"<!(node scripts/runtime_var.js PLBASE)",
+        "plarch%":"<!(node scripts/runtime_var.js PLARCH)"
     },
     "targets": [
         {

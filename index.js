@@ -1,5 +1,13 @@
+const fs = require('fs');
+const path = require('path');
 const assert = require('assert');
 const swipl = require('./build/Release/libswipl');
+
+// Set SWI_HOME_DIR based on install-time value.
+
+const filename = path.join(__dirname, 'plbase.conf');
+const plbase = fs.readFileSync(filename, 'utf8').trim();
+process.env.SWI_HOME_DIR = plbase;
 
 let initialised = false;
 let autoInitialise = true;
