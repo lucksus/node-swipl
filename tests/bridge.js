@@ -27,4 +27,20 @@ describe('SWIPL interface', () => {
         assert.equal(compound.name, 't');
         assert.equal(compound.args.length, 4);
     });
+
+    it('should throw error for invalid input', () => {
+        try {
+            swipl.callPredicate('member(X, 1,2,3,4');
+        } catch (err) {
+            assert.ok(err.toString().indexOf('Syntax error')) > 0;
+        }
+    });
+
+    it('should throw error for thrown error', () => {
+        try {
+            swipl.callPredicate('throw(error(test))');
+        } catch (err) {
+            assert.ok(err.toString().indexOf('Unknown message: error(test)')) > 0;
+        }
+    });
 });

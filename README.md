@@ -2,8 +2,53 @@
 
 A Node.js interface to the SWI-Prolog.
 
-For now, this addon supports the creation of rules and facts on
-the fly and querying.
+## Usage
+
+### Error handling
+
+Syntax errors in queries are thrown. Error messages
+are read from the prolog.
+
+Invalid query example: `member(X, [1,2,3,4]` (missing closing paren):
+
+```js
+swipl.callPredicate('member(X, [1,2,3,4]');
+```
+
+Throws error with message:
+
+```
+Error: Error during query execution. Syntax error:
+Operator expected
+member(X, 1,2,3,4
+** here **
+```
+
+Known errors are thrown with the error message.
+
+```js
+swipl.callPredicate('error:must_be(ground, _)');
+```
+
+Throws error with message:
+
+```
+Error: Error during query execution. Arguments are
+not sufficiently instantiated.
+```
+
+Custom errors without a message are thrown with JavaScript
+error containing the error term:
+
+```js
+swipl.callPredicate('throw(error(test))');
+```
+
+Throws error with message:
+
+```
+Error: Error during query execution. Unknown message: error(test).
+```
 
 ## Platform support
 
@@ -31,46 +76,6 @@ with prefix `/usr/local` (adjust `build.templ`).
 ## Known issues
 
  * PL_BLOB is not handled.
-
-### Basic usage
-
-Initialization
-
-    var swipl = require('swipl');
-    swipl.initialise();
-
-Create module
-
-    var m = swipl.module("mymod");
-
-Facts and rules (shortcut for `m.call_predicate("assert", [ term ])`)
-
-    m.assert("likes(romeo, julia).");
-    {}
-
-Querying - Single solution
-
-    m.call_predicate("likes", ["romeo", "X"]);
-    { X: 'julia' }
-
-Querying - Query
-
-    m.assert("likes(john, julia).");
-    {}
-    var q = m.open_query("likes", ["X", "julia"]);
-    undefined
-    q.next_solution();
-    { X: 'romeo' }
-    q.next_solution();
-    { X: 'john' }
-    q.next_solution();
-    false
-    q.close();
-    true
-
-Cleanup
-
-    swipl.cleanup();
 
 ### License
 

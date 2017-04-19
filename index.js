@@ -26,9 +26,12 @@ const Query = exports.Query = class Query {
 
 exports.callPredicate = (query) => {
 	const instance = new Query(query);
-	const bindings = instance.next();
-	instance.close();
-	return bindings;
+	try {
+		const bindings = instance.next();
+		return bindings;
+	} finally {
+		instance.close();
+	}
 };
 
 // Extracts bindings from the option list.

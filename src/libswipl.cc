@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <sstream>
 #include <nan.h>
 #include <SWI-Prolog.h>
 
@@ -13,26 +14,18 @@ using Nan::FunctionCallbackInfo;
 using Nan::Persistent;
 using Nan::HandleScope;
 
-module_t GetModule(const FunctionCallbackInfo<Value>& args, int idx) {
-    module_t mo = NULL;
-    if (args.Length() > idx &&
-        !(args[idx]->IsUndefined() || args[idx]->IsNull()) &&
-        args[idx]->IsString()) {
-        mo = PL_new_module(PL_new_atom(*String::Utf8Value(args[idx])));
-    }
-    return mo;
-}
-
 // Installs wrapper that extracts bindings.
 
 void InstallWrapper() {
-    char const *goal = "assert(nswi_(A,Bs):-(atom_to_term(A,G,Bs),call(G)))";
+    char const *goal = "assert(system:nswi_(A,Bs):-(atom_to_term(A,G,Bs),call(G)))";
     fid_t fid = PL_open_foreign_frame();
     term_t g = PL_new_term_ref();
     PL_chars_to_term(goal, g);
     PL_call(g, NULL);
     PL_discard_foreign_frame(fid);
 }
+
+// Initializes the SWI-Prolog engine.
 
 void Initialise(const FunctionCallbackInfo<Value>& info) {
     int rval;
@@ -57,30 +50,12 @@ void Initialise(const FunctionCallbackInfo<Value>& info) {
     info.GetReturnValue().Set(Nan::New<Number>(rval));
 }
 
+// Shuts down the SWI-Prolog engine.
+
 void Cleanup(const FunctionCallbackInfo<Value>& args) {
     HandleScope scope;
     int rval = PL_cleanup(0);
     args.GetReturnValue().Set(Nan::New<Number>(rval));
-}
-
-Local<Value> CreateException(const char *msg) {
-    Local<Object> result = Nan::New<Object>();
-    result->Set(Nan::New<String>("exc").ToLocalChecked(), Nan::New<String>(msg).ToLocalChecked());
-    return result;
-}
-
-const char* GetExceptionString(term_t term) {
-    char *msg;
-    term_t msgterms = PL_new_term_refs(2);
-    PL_put_term(msgterms, term);
-    int rval = PL_call_predicate(NULL, PL_Q_NODEBUG,
-        PL_predicate("message_to_string", 2, NULL), msgterms);
-    if (rval) {
-        rval = PL_get_chars(msgterms + 1, &msg, CVT_ALL);
-        return msg;
-    } else {
-        return "unknown error";
-    }
 }
 
 Local<Value> ExportTermValue(term_t t);
@@ -219,6 +194,22 @@ Local<Object> ExportSolution(term_t t, int len, Local<Object> vars) {
     return solution;
 }
 
+// Extracts exception string from prolog.
+
+const char* ExceptionString(term_t term) {
+    char *msg;
+    term_t msgterms = PL_new_term_refs(2);
+    PL_put_term(msgterms, term);
+    if (!PL_call_predicate(NULL, PL_Q_NODEBUG,
+        PL_predicate("message_to_string", 2, NULL), msgterms)) {
+        return "Error while getting the exception message.";
+    };
+    if (!PL_get_chars(msgterms + 1, &msg, CVT_ALL)) {
+        return "Error while extracting the exception message.";
+    }
+    return msg;
+}
+
 class InternalQuery : public Nan::ObjectWrap {
     public:
         static const int OPEN = 1;
@@ -240,8 +231,6 @@ class InternalQuery : public Nan::ObjectWrap {
             }
             args.GetReturnValue().Set(true);
         }
-
-        static void Exception(const FunctionCallbackInfo<Value>& args);
 
         // Opens wrapped query. Wrapped query returns
         // bindings.
@@ -281,8 +270,18 @@ class InternalQuery : public Nan::ObjectWrap {
                 if (PL_next_solution(queryObject->qid)) {
                     args.GetReturnValue().Set(ExportTermValue(queryObject->bindings));
                 } else {
-                    args.GetReturnValue().Set(false);
-                }                
+                    // Check if exception was raised during execution.
+                    term_t exception = PL_exception(queryObject->qid);
+                    if (exception) {
+                        std::stringstream err;
+                        err << "Error during query execution. " << ExceptionString(exception);
+                        std::string strErr = err.str();
+                        Nan::ThrowError(strErr.c_str());
+                        args.GetReturnValue().SetUndefined();
+                    } else {
+                        args.GetReturnValue().Set(false);
+                    }
+                }
             } else {
                 Nan::ThrowError("Query is closed.");
                 args.GetReturnValue().SetUndefined();
@@ -295,32 +294,18 @@ class InternalQuery : public Nan::ObjectWrap {
 };
 
 void InternalQuery::Init(Local<Object> target) {
-    // Prepare constructor template
+    // Prepare constructor template.
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(Open);
-    tpl->SetClassName(Nan::New<v8::String>("InternalQuery").ToLocalChecked());
+    tpl->SetClassName(Nan::New<String>("InternalQuery").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(3);
     // Prototype
-    tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("next").ToLocalChecked(),
+    tpl->PrototypeTemplate()->Set(Nan::New<String>("next").ToLocalChecked(),
         Nan::New<FunctionTemplate>(Next));
-    tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("close").ToLocalChecked(),
+    tpl->PrototypeTemplate()->Set(Nan::New<String>("close").ToLocalChecked(),
         Nan::New<FunctionTemplate>(Close));
-    tpl->PrototypeTemplate()->Set(Nan::New<v8::String>("exception").ToLocalChecked(),
-        Nan::New<FunctionTemplate>(Exception));
-
 
     auto constructor = Nan::GetFunction(tpl).ToLocalChecked();
-    Nan::Set(target, Nan::New<v8::String>("InternalQuery").ToLocalChecked(), constructor);
-}
-
-void InternalQuery::Exception(const FunctionCallbackInfo<Value>& args) {
-    HandleScope scope;
-    InternalQuery* obj = ObjectWrap::Unwrap<InternalQuery>(args.This());
-    term_t term = PL_exception(obj->qid);
-    if (term) {    
-        args.GetReturnValue().Set(CreateException(GetExceptionString(term)));
-    } else {
-        args.GetReturnValue().Set(Nan::True());
-    }
+    Nan::Set(target, Nan::New<String>("InternalQuery").ToLocalChecked(), constructor);
 }
 
 NAN_MODULE_INIT(init) {
