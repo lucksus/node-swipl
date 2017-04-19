@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const term = require('./lib/term');
 const swipl = require('./build/Release/libswipl');
 
 // Set SWI_HOME_DIR based on install-time value.
@@ -91,6 +92,7 @@ module.exports = {
     autoInitialise,
     Query,
     call,
+    term,
     initialise,
     cleanup
 };

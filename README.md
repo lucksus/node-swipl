@@ -67,7 +67,28 @@ swipl.call('working_directory(_, prolog)');
 swipl.call('consult(mycode)');
 ```
 
-### Term representation
+### Constructing safe queries
+
+Queries with data requiring proper escaping can be constructed
+by using helper functions from swipl.term.
+
+Example:
+
+```js
+const swipl = require('./');
+const { list, compound, variable, serialize } = swipl.term;
+
+const escaped = serialize(
+    compound('member', [
+        variable('X'),
+        list([1, 2, 3, 4])]));
+
+console.log(swipl.call(escaped));
+```
+
+Blobs and dicts are not supported.
+
+### Output term representation
 
 Prolog terms in variable bindings are converted into
 JavaScript objects under the following rules:
@@ -163,10 +184,11 @@ with prefix `/usr/local` (adjust `build.templ`).
 
 ## Known issues
 
+ * Unicode data cannot be exchanged.
  * Exporting PL_BLOB terms is not handled.
  * Exporting PL_DICT terms is not supported. It is not supported at all by SWI-Prolog
    foreign interface.
- * Installed files cannot be copied around on *nix. The linker has libswipl location
+ * Installed files cannot be copied around on *nix. The linker has `libswipl` location
    specified absolutely in the binding object file. The location of `SWI_HOME_DIR` is
    determined install-time and written into the file `plbase.conf`.
 
@@ -181,3 +203,7 @@ A list of helpful resources:
 ### License
 
 Licensed under LGPL 3.0. A copy is available in [the LICENSE.txt file](LICENSE.txt).
+File `lib/serialize_string.js` is ported from the [pengines][pengines] projects and is licensed
+under BSD (see the file header).
+
+[pengines]:https://github.com/SWI-Prolog/pengines

@@ -54,4 +54,8 @@ describe('SWIPL interface', () => {
             q1.close();
         }
     });
+
+    it('converts unicode symbol into atom consisting of its bytes', () => {
+        assert.equal(swipl.call("atom_length('♥', L)").L, 3);
+    });
 });
