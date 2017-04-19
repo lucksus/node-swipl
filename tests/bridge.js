@@ -1,10 +1,6 @@
 const assert = require('assert');
 const swipl = require('../');
 
-if (swipl.initialise() !== 1) {
-    throw new Error('Failed to initialise SWI-Prolog.');
-}
-
 describe('SWIPL interface', () => {
 
     it('should return PL_NIL as string []', () => {

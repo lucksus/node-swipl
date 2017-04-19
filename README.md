@@ -50,6 +50,14 @@ Throws error with message:
 Error: Error during query execution. Unknown message: error(test).
 ```
 
+### Disable autoinitialization
+
+The embedded SWI-Prolog engine is automatically initialized
+when creating the first query. This behavior can be disabled
+by calling `swipl.autoInitialise(false)` before any query is
+executed. The engine can be initialized later manually with
+the `swipl.initialise()` function.
+
 ## Platform support
 
 The bindings are tested on various Linux distributions, on Windows,

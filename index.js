@@ -1,10 +1,30 @@
 const assert = require('assert');
 const swipl = require('./build/Release/libswipl');
 
+let initialised = false;
+let autoInitialise = true;
+
+// Allows to disable autoinitialization of
+// the SWI-Prolog engine.
+
+exports.autoInitialise = (initialise) => {
+	autoInitialise = !!initialise;
+};
+
 const Query = exports.Query = class Query {
 	constructor(query) {
 		assert.equal(typeof query, 'string',
 			'Query must be set as a string.');
+		if (!initialised) {
+			if (autoInitialise) {
+				if (!swipl.initialise('node')) {
+					throw new Error('SWI-Prolog engine initialization failed.');
+				}
+				initialised = true;
+			} else {
+				throw new Error('SWI-Prolog is not initialised.');
+			}
+		}
 		this.internal = new swipl.InternalQuery(query);
 	}
 
@@ -45,11 +65,8 @@ const extractBindings = (list) => {
 	return bindings;
 };
 
-exports.initialise = function(prog) {
-	if (!prog) {
-		prog = 'node';
-	}
-	return swipl.initialise(prog);
+exports.initialise = () => {
+	return swipl.initialise('node');
 };
 
 exports.cleanup = function() {
