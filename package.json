@@ -1,6 +1,6 @@
 {
   "name": "node-swipl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "index.js",
   "description": "A node.js interface to the SWI-Prolog library",
   "keywords": [
@@ -9,22 +9,17 @@
     "swipl",
     "logic"
   ],
-  "author": {
-    "name": "Tom Klonikowski",
-    "email": "klonik_t@informatik.haw-hamburg.de"
-  },
   "license": "LGPL-3.0",
   "repository": {
     "type": "git",
-    "url": "git@github.com:jansegre/node-swipl.git"
+    "url": "git@github.com:rla/node-swipl.git"
   },
   "directories": {
     "src": "src",
     "tests": "tests"
   },
   "engines": {
-    "node": ">=0.10.0",
-    "libswipl": ">=5.10.0"
+    "node": ">= 7"
   },
   "scripts": {
     "install": "node scripts/store_plbase.js",
