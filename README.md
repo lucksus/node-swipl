@@ -187,10 +187,13 @@ with prefix `/usr/local` (adjust `build.templ`).
  * Unicode data cannot be exchanged.
  * Exporting PL_BLOB terms is not handled.
  * Exporting PL_DICT terms is not supported. It is not supported at all by SWI-Prolog
-   foreign interface.
+   foreign interface. #2
  * Installed files cannot be copied around on *nix. The linker has `libswipl` location
    specified absolutely in the binding object file. The location of `SWI_HOME_DIR` is
    determined install-time and written into the file `plbase.conf`.
+ * Attempt to use native SWI packages leads to symbol lookup errors
+   like `readutil.so: undefined symbol: PL_new_atom`. #3
+ * Custom initialization parameters are not yet implemented. #4
 
 ## Development
 
@@ -200,7 +203,18 @@ A list of helpful resources:
  * Node.js native addons: <https://nodejs.org/api/addons.html>
  * PySWIP sources: <https://code.google.com/archive/p/pyswip/>
 
-### License
+## Alternatives
+
+ * [Pengines package][pengines-package].
+ * Run SWI as HTTP server and create a JSON API.
+
+[pengines-package]:https://www.npmjs.com/package/pengines
+
+## Authors
+
+Please see the AUTHORS file.
+
+## License
 
 Licensed under LGPL 3.0. A copy is available in [the LICENSE.txt file](LICENSE.txt).
 File `lib/serialize_string.js` is ported from the [pengines][pengines] project and is licensed
