@@ -187,13 +187,13 @@ with prefix `/usr/local` (adjust `build.templ`).
  * Unicode data cannot be exchanged.
  * Exporting PL_BLOB terms is not handled.
  * Exporting PL_DICT terms is not supported. It is not supported at all by SWI-Prolog
-   foreign interface. #2
+   foreign interface.
  * Installed files cannot be copied around on *nix. The linker has `libswipl` location
    specified absolutely in the binding object file. The location of `SWI_HOME_DIR` is
    determined install-time and written into the file `plbase.conf`.
  * Attempt to use native SWI packages leads to symbol lookup errors
-   like `readutil.so: undefined symbol: PL_new_atom`. #3
- * Custom initialization parameters are not yet implemented. #4
+   like `readutil.so: undefined symbol: PL_new_atom`.
+ * Custom initialization parameters are not yet implemented.
 
 ## Development
 
