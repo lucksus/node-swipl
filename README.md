@@ -4,6 +4,18 @@ A Node.js interface to the SWI-Prolog.
 
 [![Build Status](https://travis-ci.org/rla/node-swipl.svg?branch=master)](https://travis-ci.org/rla/node-swipl)
 
+Installation:
+
+You need to have SWI-Prolog installed and `swipl` binary available in
+`PATH` and compiler installed. See "Platform support" for operating system
+support. The library requires Node.js version 7+ and SWI-Prolog 6+.
+
+```
+npm install swipl
+```
+
+Also see "Known issues" for currently unsolved problems.
+
 ## Usage
 
 Calling a predicate and returning bindings with
