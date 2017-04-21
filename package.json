@@ -1,6 +1,6 @@
 {
   "name": "swipl",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "index.js",
   "description": "A node.js interface to the SWI-Prolog.",
   "keywords": [
@@ -29,6 +29,18 @@
     "nan": "^2.4.0"
   },
   "devDependencies": {
-    "mocha": "^3.2.0"
-  }
+    "mocha": "^3.2.0",
+    "node-gyp": "^3.6.0"
+  },
+  "files": [
+    "src",
+    "lib",
+    "tests",
+    "binding.gyp",
+    "index.js",
+    "LICENSE.txt",
+    "package.json",
+    "README.md",
+    "AUTHORS"
+  ]
 }
