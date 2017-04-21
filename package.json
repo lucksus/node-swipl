@@ -1,6 +1,6 @@
 {
   "name": "swipl",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
   "description": "A node.js interface to the SWI-Prolog.",
   "keywords": [
@@ -22,7 +22,7 @@
     "node": ">= 7"
   },
   "scripts": {
-    "install": "node scripts/store_plbase.js",
+    "postinstall": "node scripts/store_plbase.js",
     "test": "node-gyp configure build && mocha tests/bridge.js tests/simple.js tests/consult.js"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
     "src",
     "lib",
     "tests",
+    "scripts",
     "binding.gyp",
     "index.js",
     "LICENSE.txt",
