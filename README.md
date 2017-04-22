@@ -4,7 +4,7 @@ A Node.js interface to the SWI-Prolog.
 
 [![Build Status](https://travis-ci.org/rla/node-swipl.svg?branch=master)](https://travis-ci.org/rla/node-swipl)
 
-Installation:
+## Installation:
 
 You need to have SWI-Prolog installed and `swipl` binary available in
 `PATH` and compiler installed. See "Platform support" for operating system
@@ -218,9 +218,11 @@ A list of helpful resources:
 ## Alternatives
 
  * [Pengines package][pengines-package].
+ * Package [swipl-stdio][swipl-stdio].
  * Run SWI as HTTP server and create a JSON API.
 
 [pengines-package]:https://www.npmjs.com/package/pengines
+[swipl-stdio]:https://github.com/rla/node-swipl-stdio
 
 ## Authors
 
