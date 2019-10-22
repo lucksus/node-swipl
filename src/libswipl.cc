@@ -8,6 +8,7 @@ using v8::String;
 using v8::Object;
 using v8::Value;
 using v8::Local;
+using v8::MaybeLocal;
 using v8::Number;
 using v8::FunctionTemplate;
 using v8::Function;
@@ -40,7 +41,7 @@ void Initialise(const FunctionCallbackInfo<Value>& info) {
 
     /* Make the argument vector for Prolog. */
 
-    String::Utf8Value str(info[0]);
+    Nan::Utf8String str(info[0]);
     plav[0] = *str;
     plav[1] = "--quiet";
     plav[2] = nullptr;
@@ -85,11 +86,11 @@ Local<Value> ExportCompound(term_t t) {
             ThrowError("PL_get_arg failed.");
             return Null();
         }
-        args->Set(i - 1, ExportTermValue(arg_t));
+        Nan::Set(args, i - 1, ExportTermValue(arg_t));
     }
-    compound->Set(New<String>("name").ToLocalChecked(),
+    Nan::Set(compound, New<String>("name").ToLocalChecked(),
         New<String>(name).ToLocalChecked());
-    compound->Set(New<String>("args").ToLocalChecked(), args);
+    Nan::Set(compound, New<String>("args").ToLocalChecked(), args);
     return compound;
 }
 
@@ -146,9 +147,9 @@ Local<Value> ExportListPair(term_t t) {
     if (!PL_get_list(t, head, tail)) {
         ThrowError("PL_get_list failed.");
     };
-    pair->Set(New<String>("head").ToLocalChecked(),
+    Nan::Set(pair, New<String>("head").ToLocalChecked(),
         ExportTermValue(head));
-    pair->Set(New<String>("tail").ToLocalChecked(),
+    Nan::Set(pair, New<String>("tail").ToLocalChecked(),
         ExportTermValue(tail));
     return pair;
 };
@@ -159,9 +160,9 @@ Local<Value> ExportListPair(term_t t) {
 Local<Value> ExportTermValue(term_t t) {
     int type = PL_term_type(t);
     switch (type) {
-        case PL_FLOAT:            
+        case PL_FLOAT:
             return ExportFloat(t);
-        case PL_INTEGER:            
+        case PL_INTEGER:
             return ExportInteger(t);
         case PL_NIL:
             return New<String>("[]").ToLocalChecked();
@@ -194,11 +195,11 @@ Local<Object> ExportSolution(term_t t, int len, Local<Object> vars) {
     Local<Object> solution = New<Object>();
     for (int j = 0; j < len; j++) {
         int tj = t + j;
-        Local<Value> key = vars->Get(tj);
-        if (key->IsUndefined()) {
+        MaybeLocal<Value> key = Nan::Get(vars, tj);
+        if (key.IsEmpty()) {
             continue;
         }
-        solution->Set(key, ExportTermValue(tj));
+        Nan::Set(solution, key.ToLocalChecked(), ExportTermValue(tj));
     }
     return solution;
 }
@@ -250,7 +251,7 @@ class InternalQuery : public Nan::ObjectWrap {
             InternalQuery* queryObject = new InternalQuery();
             queryObject->open = CLOSED;
             fid_t fid = PL_open_foreign_frame();
-            String::Utf8Value string(args[0]);
+            Nan::Utf8String string(args[0]);
             atom_t query = PL_new_atom(*string);
             term_t refs = PL_new_term_refs(2);
             if (!PL_put_atom(refs, query)) {
@@ -291,7 +292,7 @@ class InternalQuery : public Nan::ObjectWrap {
                         queryObject->open = CLOSED;
                         tc.ReThrow();
                         args.GetReturnValue().SetUndefined();
-                    }                    
+                    }
                 } else {
                     // Check if exception was raised during execution.
                     term_t exception = PL_exception(queryObject->qid);
@@ -301,7 +302,7 @@ class InternalQuery : public Nan::ObjectWrap {
                         PL_close_query(queryObject->qid);
                         PL_discard_foreign_frame(queryObject->fid);
                         std::string strErr = err.str();
-                        queryObject->open = CLOSED;     
+                        queryObject->open = CLOSED;
                         ThrowError(strErr.c_str());
                         args.GetReturnValue().SetUndefined();
                     } else {

@@ -23,7 +23,7 @@
             },
             "conditions": [
                 ['OS=="win"', {
-                    "libraries": [ "-l<(plbase)/lib/libswipl.lib" ]
+                    "libraries": [ "-l<(plbase)/bin/libswipl.dll.a" ]
                 },{
                     "libraries": [ "-lswipl -L<(plbase)/lib/<(plarch) -Wl,-rpath <(plbase)/lib/<(plarch)" ]
                 }]
