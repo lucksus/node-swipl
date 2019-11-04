@@ -8,7 +8,7 @@ A Node.js interface to the SWI-Prolog.
 
 You need to have SWI-Prolog installed and `swipl` binary available in
 `PATH` and compiler installed. See "Platform support" for operating system
-support. The library requires Node.js version 7+ and SWI-Prolog 6+.
+support. The library requires Node.js version 7+ and SWI-Prolog 8+.
 
 ```
 npm install swipl
@@ -210,7 +210,7 @@ with prefix `/usr/local` (adjust `build.templ`).
 ## Development
 
 A list of helpful resources:
- 
+
  * SWI-Prolog Foreign Interface documentation: <http://www.swi-prolog.org/pldoc/man?section=foreign>
  * Node.js native addons: <https://nodejs.org/api/addons.html>
  * PySWIP sources: <https://code.google.com/archive/p/pyswip/>

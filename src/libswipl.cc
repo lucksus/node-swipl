@@ -309,6 +309,7 @@ class InternalQuery : public Nan::ObjectWrap {
                         // Last solution. Close query and frame.
                         PL_close_query(queryObject->qid);
                         PL_discard_foreign_frame(queryObject->fid);
+                        queryObject->open = CLOSED;
                         args.GetReturnValue().Set(false);
                     }
                 }
