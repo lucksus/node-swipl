@@ -72,7 +72,7 @@ Local<Value> ExportTermValue(term_t t);
 Local<Value> ExportCompound(term_t t) {
     Local<Object> compound = New<Object>();
     atom_t n;
-    int arity;
+    size_t arity;
     const char *name;
     if (!PL_get_compound_name_arity(t, &n, &arity)) {
         ThrowError("PL_get_compound_name_arity failed.");
