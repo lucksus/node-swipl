@@ -80,7 +80,7 @@ Local<Value> ExportCompound(term_t t) {
     }
     name = PL_atom_chars(n);
     Local<Array> args = New<Array>();
-    for (int i = 1; i <= arity; ++i) {
+    for (size_t i = 1; i <= arity; ++i) {
         term_t arg_t = PL_new_term_ref();
         if (!PL_get_arg(i, t, arg_t)) {
             ThrowError("PL_get_arg failed.");
